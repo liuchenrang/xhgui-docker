@@ -172,7 +172,7 @@ register_shutdown_function(
         } else {
             $requestTs = new MongoDate($time);
             $requestTsMicro = new MongoDate($requestTimeFloat[0], $requestTimeFloat[1]);
-        }
+        } //mongodb
 
         $data['meta'] = array(
             'url' => $uri,
