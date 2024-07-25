@@ -5,5 +5,6 @@
 - www目录下说明
   - xhgui-header 用于最小接入目标系统 ，具体使用看 https://github.com/liuchenrang/xhgui-header
 ## 启动步骤
+  sudo chmod 777 -Rf www/xhgui-branch/cache/
 - docker network create --driver=bridge xhgui-net
 - docker-compose up -d

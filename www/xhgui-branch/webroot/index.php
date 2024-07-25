@@ -1,6 +1,5 @@
 <?php
    error_reporting(0);
-    
 require dirname(__DIR__) . '/src/bootstrap.php';
 
 $di = new Xhgui_ServiceContainer();
