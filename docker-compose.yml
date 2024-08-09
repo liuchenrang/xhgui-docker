@@ -15,7 +15,8 @@ services:
       - xhgui-net
   php56:
     build:
-      context: .
+      # context: .
+      image: registry.cn-hangzhou.aliyuncs.com/ywimg/xhgui-docker-php56:20240809
       args:
         PHP_VERSION: ${PHP56_VERSION}
         ALPINE_REPOSITORIES: ${ALPINE_REPOSITORIES}
