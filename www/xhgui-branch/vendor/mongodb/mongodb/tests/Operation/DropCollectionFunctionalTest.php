@@ -6,14 +6,15 @@ use MongoDB\Operation\DropCollection;
 use MongoDB\Operation\InsertOne;
 use MongoDB\Operation\ListCollections;
 use MongoDB\Tests\CommandObserver;
-use stdClass;
+use function sprintf;
+use function version_compare;
 
 class DropCollectionFunctionalTest extends FunctionalTestCase
 {
     public function testDefaultWriteConcernIsOmitted()
     {
-        (new CommandObserver)->observe(
-            function() {
+        (new CommandObserver())->observe(
+            function () {
                 $operation = new DropCollection(
                     $this->getDatabaseName(),
                     $this->getCollectionName(),
@@ -22,8 +23,8 @@ class DropCollectionFunctionalTest extends FunctionalTestCase
 
                 $operation->execute($this->getPrimaryServer());
             },
-            function(stdClass $command) {
-                $this->assertObjectNotHasAttribute('writeConcern', $command);
+            function (array $event) {
+                $this->assertObjectNotHasAttribute('writeConcern', $event['started']->getCommand());
             }
         );
     }
@@ -59,8 +60,8 @@ class DropCollectionFunctionalTest extends FunctionalTestCase
             $this->markTestSkipped('Sessions are not supported');
         }
 
-        (new CommandObserver)->observe(
-            function() {
+        (new CommandObserver())->observe(
+            function () {
                 $operation = new DropCollection(
                     $this->getDatabaseName(),
                     $this->getCollectionName(),
@@ -69,8 +70,8 @@ class DropCollectionFunctionalTest extends FunctionalTestCase
 
                 $operation->execute($this->getPrimaryServer());
             },
-            function(stdClass $command) {
-                $this->assertObjectHasAttribute('lsid', $command);
+            function (array $event) {
+                $this->assertObjectHasAttribute('lsid', $event['started']->getCommand());
             }
         );
     }

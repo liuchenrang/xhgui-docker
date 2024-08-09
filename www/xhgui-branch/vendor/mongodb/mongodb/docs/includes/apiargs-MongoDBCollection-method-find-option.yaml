@@ -87,18 +87,11 @@ interface: phpmethod
 operation: ~
 optional: true
 ---
-arg_name: option
-name: hint
-type: string|array|object
-description: |
-  The index to use. Specify either the index name as a string or the index key
-  pattern as a document. If specified, then the query system will only consider
-  plans using the hinted index.
-
+source:
+  file: apiargs-common-option.yaml
+  ref: hint
+post: |
   .. versionadded:: 1.2
-interface: phpmethod
-operation: ~
-optional: true
 ---
 arg_name: option
 name: maxAwaitTimeMS
@@ -148,6 +141,7 @@ type: integer
 description: |
   Maximum number of documents or index keys to scan when executing the query.
 
+  .. deprecated:: 1.4
   .. versionadded:: 1.2
 interface: phpmethod
 operation: ~
@@ -221,6 +215,7 @@ description: |
   Prevents the cursor from returning a document more than once because of an
   intervening write operation.
 
+  .. deprecated:: 1.4
   .. versionadded:: 1.2
 interface: phpmethod
 operation: ~

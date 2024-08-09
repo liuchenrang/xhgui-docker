@@ -1,10 +1,8 @@
-version: "3"
 services:
   nginx:
     image: nginx:${NGINX_VERSION}
     # 看情况开启
     ports:
-      - "${NGINX_HTTP_HOST_PORT}:80"
       - "8090:8090"
       # - "${NGINX_HTTPS_HOST_PORT}:443"
     volumes:
@@ -15,25 +13,24 @@ services:
     restart: always
     networks:
       - xhgui-net
-  php72:
+  php56:
     build:
       context: .
       args:
-        PHP_VERSION: ${PHP72_VERSION}
+        PHP_VERSION: ${PHP56_VERSION}
         ALPINE_REPOSITORIES: ${ALPINE_REPOSITORIES}
-        PHP_EXTENSIONS: ${PHP72_EXTENSIONS}
-        MORE_EXTENSION_INSTALLER: php72.sh
+        PHP_EXTENSIONS: ${PHP56_EXTENSIONS}
+        MORE_EXTENSION_INSTALLER: php56.sh
     volumes:
       - ${SOURCE_DIR}:/var/www/html/:rw
-      - ${PHP72_PHP_CONF_FILE}:/usr/local/etc/php/php.ini:ro
-      - ${PHP72_FPM_CONF_FILE}:/usr/local/etc/php-fpm.d/www.conf:rw
-      - ${PHP72_LOG_DIR}:/var/log/php
+      - ${PHP56_PHP_CONF_FILE}:/usr/local/etc/php/php.ini:ro
+      - ${PHP56_FPM_CONF_FILE}:/usr/local/etc/php-fpm.d/www.conf:rw
+      - ${PHP56_LOG_DIR}:/var/log/php
     restart: always
     cap_add:
       - SYS_PTRACE
     networks:
       - xhgui-net
-  
   mongo:
     image: mongo:${MONGO_VERSION}
     # ports:
@@ -58,4 +55,3 @@ services:
   
 networks:
   xhgui-net:
-     external: true

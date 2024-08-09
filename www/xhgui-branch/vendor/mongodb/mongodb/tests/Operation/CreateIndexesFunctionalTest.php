@@ -2,13 +2,16 @@
 
 namespace MongoDB\Tests\Operation;
 
+use InvalidArgumentException;
+use MongoDB\Driver\Exception\RuntimeException;
 use MongoDB\Model\IndexInfo;
 use MongoDB\Operation\CreateIndexes;
-use MongoDB\Operation\DropIndexes;
 use MongoDB\Operation\ListIndexes;
 use MongoDB\Tests\CommandObserver;
-use InvalidArgumentException;
-use stdClass;
+use function call_user_func;
+use function is_callable;
+use function sprintf;
+use function version_compare;
 
 class CreateIndexesFunctionalTest extends FunctionalTestCase
 {
@@ -20,7 +23,7 @@ class CreateIndexesFunctionalTest extends FunctionalTestCase
         $createdIndexNames = $operation->execute($this->getPrimaryServer());
 
         $this->assertSame('x_1', $createdIndexNames[0]);
-        $this->assertIndexExists('x_1', function(IndexInfo $info) {
+        $this->assertIndexExists('x_1', function (IndexInfo $info) {
             $this->assertTrue($info->isSparse());
             $this->assertTrue($info->isUnique());
             $this->assertFalse($info->isTtl());
@@ -35,7 +38,7 @@ class CreateIndexesFunctionalTest extends FunctionalTestCase
         $createdIndexNames = $operation->execute($this->getPrimaryServer());
 
         $this->assertSame('y_-1_z_1', $createdIndexNames[0]);
-        $this->assertIndexExists('y_-1_z_1', function(IndexInfo $info) {
+        $this->assertIndexExists('y_-1_z_1', function (IndexInfo $info) {
             $this->assertFalse($info->isSparse());
             $this->assertFalse($info->isUnique());
             $this->assertFalse($info->isTtl());
@@ -50,7 +53,7 @@ class CreateIndexesFunctionalTest extends FunctionalTestCase
         $createdIndexNames = $operation->execute($this->getPrimaryServer());
 
         $this->assertSame('g_2dsphere_z_1', $createdIndexNames[0]);
-        $this->assertIndexExists('g_2dsphere_z_1', function(IndexInfo $info) {
+        $this->assertIndexExists('g_2dsphere_z_1', function (IndexInfo $info) {
             $this->assertFalse($info->isSparse());
             $this->assertFalse($info->isUnique());
             $this->assertFalse($info->isTtl());
@@ -65,7 +68,7 @@ class CreateIndexesFunctionalTest extends FunctionalTestCase
         $createdIndexNames = $operation->execute($this->getPrimaryServer());
 
         $this->assertSame('my_ttl', $createdIndexNames[0]);
-        $this->assertIndexExists('my_ttl', function(IndexInfo $info) {
+        $this->assertIndexExists('my_ttl', function (IndexInfo $info) {
             $this->assertFalse($info->isSparse());
             $this->assertFalse($info->isUnique());
             $this->assertTrue($info->isTtl());
@@ -88,34 +91,31 @@ class CreateIndexesFunctionalTest extends FunctionalTestCase
 
         $this->assertSame($expectedNames, $createdIndexNames);
 
-        $this->assertIndexExists('x_1', function(IndexInfo $info) {
+        $this->assertIndexExists('x_1', function (IndexInfo $info) {
             $this->assertTrue($info->isSparse());
             $this->assertTrue($info->isUnique());
             $this->assertFalse($info->isTtl());
         });
 
-        $this->assertIndexExists('y_-1_z_1', function(IndexInfo $info) {
+        $this->assertIndexExists('y_-1_z_1', function (IndexInfo $info) {
             $this->assertFalse($info->isSparse());
             $this->assertFalse($info->isUnique());
             $this->assertFalse($info->isTtl());
         });
 
-        $this->assertIndexExists('g_2dsphere_z_1', function(IndexInfo $info) {
+        $this->assertIndexExists('g_2dsphere_z_1', function (IndexInfo $info) {
             $this->assertFalse($info->isSparse());
             $this->assertFalse($info->isUnique());
             $this->assertFalse($info->isTtl());
         });
 
-        $this->assertIndexExists('my_ttl', function(IndexInfo $info) {
+        $this->assertIndexExists('my_ttl', function (IndexInfo $info) {
             $this->assertFalse($info->isSparse());
             $this->assertFalse($info->isUnique());
             $this->assertTrue($info->isTtl());
         });
     }
 
-    /**
-     * @expectedException MongoDB\Driver\Exception\RuntimeException
-     */
     public function testCreateConflictingIndexesWithCommand()
     {
         $indexes = [
@@ -124,13 +124,15 @@ class CreateIndexesFunctionalTest extends FunctionalTestCase
         ];
 
         $operation = new CreateIndexes($this->getDatabaseName(), $this->getCollectionName(), $indexes);
-        $createdIndexNames = $operation->execute($this->getPrimaryServer());
+
+        $this->expectException(RuntimeException::class);
+        $operation->execute($this->getPrimaryServer());
     }
 
     public function testDefaultWriteConcernIsOmitted()
     {
-        (new CommandObserver)->observe(
-            function() {
+        (new CommandObserver())->observe(
+            function () {
                 $operation = new CreateIndexes(
                     $this->getDatabaseName(),
                     $this->getCollectionName(),
@@ -140,8 +142,8 @@ class CreateIndexesFunctionalTest extends FunctionalTestCase
 
                 $operation->execute($this->getPrimaryServer());
             },
-            function(stdClass $command) {
-                $this->assertObjectNotHasAttribute('writeConcern', $command);
+            function (array $event) {
+                $this->assertObjectNotHasAttribute('writeConcern', $event['started']->getCommand());
             }
         );
     }
@@ -152,8 +154,8 @@ class CreateIndexesFunctionalTest extends FunctionalTestCase
             $this->markTestSkipped('Sessions are not supported');
         }
 
-        (new CommandObserver)->observe(
-            function() {
+        (new CommandObserver())->observe(
+            function () {
                 $operation = new CreateIndexes(
                     $this->getDatabaseName(),
                     $this->getCollectionName(),
@@ -163,8 +165,8 @@ class CreateIndexesFunctionalTest extends FunctionalTestCase
 
                 $operation->execute($this->getPrimaryServer());
             },
-            function(stdClass $command) {
-                $this->assertObjectHasAttribute('lsid', $command);
+            function (array $event) {
+                $this->assertObjectHasAttribute('lsid', $event['started']->getCommand());
             }
         );
     }

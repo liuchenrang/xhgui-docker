@@ -74,6 +74,7 @@ class Xhgui_Profiles
             $opts['conditions'],
             array('_id' => 1))->count();
 
+       
         $totalPages = max(ceil($totalRows / $opts['perPage']), 1);
         $page = 1;
         if (isset($options['page'])) {
@@ -100,7 +101,6 @@ class Xhgui_Profiles
                 ->skip((int)($page - 1) * $opts['perPage'])
                 ->limit($opts['perPage']);
         }
-
         return array(
             'results' => $this->_wrap($cursor),
             'sort' => $opts['sort'],
