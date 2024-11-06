@@ -2,12 +2,16 @@
 
 namespace MongoDB\Tests\Operation;
 
+use InvalidArgumentException;
+use MongoDB\Model\IndexInfo;
 use MongoDB\Operation\CreateIndexes;
 use MongoDB\Operation\DropIndexes;
 use MongoDB\Operation\ListIndexes;
 use MongoDB\Tests\CommandObserver;
-use InvalidArgumentException;
-use stdClass;
+use function call_user_func;
+use function is_callable;
+use function sprintf;
+use function version_compare;
 
 class DropIndexesFunctionalTest extends FunctionalTestCase
 {
@@ -16,8 +20,8 @@ class DropIndexesFunctionalTest extends FunctionalTestCase
         $operation = new CreateIndexes($this->getDatabaseName(), $this->getCollectionName(), [['key' => ['x' => 1]]]);
         $operation->execute($this->getPrimaryServer());
 
-        (new CommandObserver)->observe(
-            function() {
+        (new CommandObserver())->observe(
+            function () {
                 $operation = new DropIndexes(
                     $this->getDatabaseName(),
                     $this->getCollectionName(),
@@ -27,8 +31,8 @@ class DropIndexesFunctionalTest extends FunctionalTestCase
 
                 $operation->execute($this->getPrimaryServer());
             },
-            function(stdClass $command) {
-                $this->assertObjectNotHasAttribute('writeConcern', $command);
+            function (array $event) {
+                $this->assertObjectNotHasAttribute('writeConcern', $event['started']->getCommand());
             }
         );
     }
@@ -88,6 +92,34 @@ class DropIndexesFunctionalTest extends FunctionalTestCase
         }
     }
 
+    public function testDropByIndexInfo()
+    {
+        $info = new IndexInfo([
+            'v' => 1,
+            'key' => ['x' => 1],
+            'name' => 'x_1',
+            'ns' => 'foo.bar',
+        ]);
+
+        $operation = new CreateIndexes($this->getDatabaseName(), $this->getCollectionName(), [['key' => ['x' => 1]]]);
+        $createdIndexNames = $operation->execute($this->getPrimaryServer());
+
+        $this->assertSame('x_1', $createdIndexNames[0]);
+        $this->assertIndexExists('x_1');
+
+        $operation = new DropIndexes($this->getDatabaseName(), $this->getCollectionName(), $info);
+        $this->assertCommandSucceeded($operation->execute($this->getPrimaryServer()));
+
+        $operation = new ListIndexes($this->getDatabaseName(), $this->getCollectionName());
+        $indexes = $operation->execute($this->getPrimaryServer());
+
+        foreach ($indexes as $index) {
+            if ($index->getName() === 'x_1') {
+                $this->fail('The "x_1" index should have been deleted');
+            }
+        }
+    }
+
     public function testSessionOption()
     {
         if (version_compare($this->getServerVersion(), '3.6.0', '<')) {
@@ -97,8 +129,8 @@ class DropIndexesFunctionalTest extends FunctionalTestCase
         $operation = new CreateIndexes($this->getDatabaseName(), $this->getCollectionName(), [['key' => ['x' => 1]]]);
         $operation->execute($this->getPrimaryServer());
 
-        (new CommandObserver)->observe(
-            function() {
+        (new CommandObserver())->observe(
+            function () {
                 $operation = new DropIndexes(
                     $this->getDatabaseName(),
                     $this->getCollectionName(),
@@ -108,8 +140,8 @@ class DropIndexesFunctionalTest extends FunctionalTestCase
 
                 $operation->execute($this->getPrimaryServer());
             },
-            function(stdClass $command) {
-                $this->assertObjectHasAttribute('lsid', $command);
+            function (array $event) {
+                $this->assertObjectHasAttribute('lsid', $event['started']->getCommand());
             }
         );
     }

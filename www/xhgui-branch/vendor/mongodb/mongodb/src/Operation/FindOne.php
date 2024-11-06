@@ -17,10 +17,11 @@
 
 namespace MongoDB\Operation;
 
-use MongoDB\Driver\Server;
 use MongoDB\Driver\Exception\RuntimeException as DriverRuntimeException;
+use MongoDB\Driver\Server;
 use MongoDB\Exception\InvalidArgumentException;
 use MongoDB\Exception\UnsupportedException;
+use function current;
 
 /**
  * Operation for finding a single document with the find command.
@@ -30,8 +31,9 @@ use MongoDB\Exception\UnsupportedException;
  * @see http://docs.mongodb.org/manual/tutorial/query-documents/
  * @see http://docs.mongodb.org/manual/reference/operator/query-modifier/
  */
-class FindOne implements Executable
+class FindOne implements Executable, Explainable
 {
+    /** @var Find */
     private $find;
 
     /**
@@ -55,6 +57,8 @@ class FindOne implements Executable
      *
      *  * maxScan (integer): Maximum number of documents or index keys to scan
      *    when executing the query.
+     *
+     *    This option has been deprecated since version 1.4.
      *
      *  * maxTimeMS (integer): The maximum amount of time to allow the query to
      *    run. If "$maxTimeMS" also exists in the modifiers document, this
@@ -124,6 +128,11 @@ class FindOne implements Executable
         $cursor = $this->find->execute($server);
         $document = current($cursor->toArray());
 
-        return ($document === false) ? null : $document;
+        return $document === false ? null : $document;
+    }
+
+    public function getCommandDocument(Server $server)
+    {
+        return $this->find->getCommandDocument($server);
     }
 }

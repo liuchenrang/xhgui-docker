@@ -2,23 +2,21 @@
 
 namespace MongoDB\Tests\Model;
 
+use Exception;
 use MongoDB\Model\CachingIterator;
 use MongoDB\Tests\TestCase;
-use Exception;
+use function iterator_to_array;
 
 class CachingIteratorTest extends TestCase
 {
-    /**
-     * Sanity check for all following tests.
-     *
-     * @expectedException \Exception
-     * @expectedExceptionMessage Cannot traverse an already closed generator
-     */
     public function testTraversingGeneratorConsumesIt()
     {
         $iterator = $this->getTraversable([1, 2, 3]);
         $this->assertSame([1, 2, 3], iterator_to_array($iterator));
-        $this->assertSame([1, 2, 3], iterator_to_array($iterator));
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Cannot traverse an already closed generator');
+        iterator_to_array($iterator);
     }
 
     public function testConstructorRewinds()
@@ -55,7 +53,7 @@ class CachingIteratorTest extends TestCase
 
     public function testPartialIterationDoesNotExhaust()
     {
-        $traversable = $this->getTraversableThatThrows([1, 2, new Exception]);
+        $traversable = $this->getTraversable([1, 2, new Exception()]);
         $iterator = new CachingIterator($traversable);
 
         $expectedKey = 0;
@@ -112,13 +110,6 @@ class CachingIteratorTest extends TestCase
     }
 
     private function getTraversable($items)
-    {
-        foreach ($items as $item) {
-            yield $item;
-        }
-    }
-
-    private function getTraversableThatThrows($items)
     {
         foreach ($items as $item) {
             if ($item instanceof Exception) {

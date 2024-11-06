@@ -24,6 +24,7 @@ class Xhgui_Profile
     public function __construct($profile, $convert = true)
     {
         $this->_data = $profile;
+
         if (!empty($profile['profile']) && $convert) {
             $this->_process();
         }
@@ -141,6 +142,7 @@ class Xhgui_Profile
         if ($date) {
             return new DateTime('@' . $date);
         }
+       
         return new DateTime('now');
     }
 
