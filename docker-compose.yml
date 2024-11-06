@@ -14,9 +14,9 @@ services:
     networks:
       - xhgui-net
   php56:
-    build:
+    #build:
       # context: .
-      image: xinghuo/xhgui-php56:20241106
+    image: xinghuo/xhgui-php56:20241106
 
     volumes:
       - ${SOURCE_DIR}:/var/www/html/:rw
