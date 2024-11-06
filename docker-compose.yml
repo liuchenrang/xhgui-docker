@@ -1,6 +1,6 @@
 version: "3"
 services:
-  nginx:
+  web:
     image: nginx:${NGINX_VERSION}
     # 看情况开启
     ports:
@@ -14,19 +14,8 @@ services:
     restart: always
     networks:
       - xhgui-net
-  web-xhgui:
-    image: nginx:${NGINX_VERSION}
-    volumes:
-      - ${SOURCE_DIR}:/var/www/html/:rw
-      - ${NGINX_CONFD_DIR}:/etc/nginx/conf.d/:rw
-      - ${NGINX_CONF_FILE}:/etc/nginx/nginx.conf:ro
-      - ${NGINX_LOG_DIR}:/var/log/nginx/:rw
-    restart: always
-    networks:
-      - xhgui-net
-
   php72:
-    image: 
+    image:  registry.cn-hangzhou.aliyuncs.com/ywimg/xhgui-docker-php72:20240809
     # build:
     #   context: .
     #   args:
