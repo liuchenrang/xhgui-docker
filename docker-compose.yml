@@ -17,10 +17,7 @@ services:
     build:
       # context: .
       image: xinghuo/xhgui-php56:20241106
-      args:
-        ALPINE_REPOSITORIES: ${ALPINE_REPOSITORIES}
-        PHP_EXTENSIONS: ${PHP_EXTENSIONS}
-        MORE_EXTENSION_INSTALLER: php56.sh
+
     volumes:
       - ${SOURCE_DIR}:/var/www/html/:rw
       - ${PHP_PHP_CONF_FILE}:/usr/local/etc/php/php.ini:ro
