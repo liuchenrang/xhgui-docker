@@ -1,9 +1,10 @@
+version: "3"
 services:
   nginx:
     image: nginx:${NGINX_VERSION}
     # 看情况开启
     ports:
-      - "8090:8090"
+      - "${NGINX_HTTP_HOST_PORT}:80"
       # - "${NGINX_HTTPS_HOST_PORT}:443"
     volumes:
       - ${SOURCE_DIR}:/var/www/html/:rw
@@ -13,32 +14,44 @@ services:
     restart: always
     networks:
       - xhgui-net
-  php56:
-    image: registry.cn-hangzhou.aliyuncs.com/ywimg/xhgui-docker-php56:20240809
+  web-xhgui:
+    image: nginx:${NGINX_VERSION}
 
-    # build:
-      # context: .
-      # args:
-      #   PHP_VERSION: ${PHP56_VERSION}
-      #   ALPINE_REPOSITORIES: ${ALPINE_REPOSITORIES}
-      #   PHP_EXTENSIONS: ${PHP56_EXTENSIONS}
-      #   MORE_EXTENSION_INSTALLER: php56.sh
     volumes:
       - ${SOURCE_DIR}:/var/www/html/:rw
-      - ${PHP_PHP_CONF_FILE}:/usr/local/etc/php/php.ini:ro
-      - ${PHP_FPM_CONF_FILE}:/usr/local/etc/php-fpm.d/www.conf:rw
-      - ${PHP_LOG_DIR}:/var/log/php
+      - ${NGINX_CONFD_DIR}:/etc/nginx/conf.d/:rw
+      - ${NGINX_CONF_FILE}:/etc/nginx/nginx.conf:ro
+      - ${NGINX_LOG_DIR}:/var/log/nginx/:rw
+    restart: always
+    networks:
+      - xhgui-net
+
+  php72:
+    build:
+      context: .
+      args:
+        PHP_VERSION: ${PHP72_VERSION}
+        ALPINE_REPOSITORIES: ${ALPINE_REPOSITORIES}
+        PHP_EXTENSIONS: ${PHP72_EXTENSIONS}
+        MORE_EXTENSION_INSTALLER: php72.sh
+    volumes:
+      - ${SOURCE_DIR}:/var/www/html/:rw
+      - ${PHP72_PHP_CONF_FILE}:/usr/local/etc/php/php.ini:ro
+      - ${PHP72_FPM_CONF_FILE}:/usr/local/etc/php-fpm.d/www.conf:rw
+      - ${PHP72_LOG_DIR}:/var/log/php
     restart: always
     cap_add:
       - SYS_PTRACE
     networks:
       - xhgui-net
+
   mongo:
     image: mongo:${MONGO_VERSION}
     # ports:
       # - "${MONGO_HOST_PORT}:27017"
     volumes:
       - ${MONGO_DATA_DB_DIR}:/data/db:rw
+      - ./:/data/db:rw
     restart: always
     networks:
       - xhgui-net
@@ -54,6 +67,7 @@ services:
     - ME_CONFIG_BASICAUTH_PASSWORD=${MONGO_PASSWORD}
     networks:
       - xhgui-net
-  
+
 networks:
   xhgui-net:
+     external: true
