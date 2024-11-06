@@ -51,7 +51,6 @@ services:
       # - "${MONGO_HOST_PORT}:27017"
     volumes:
       - ${MONGO_DATA_DB_DIR}:/data/db:rw
-      - ./:/data/db:rw
     restart: always
     networks:
       - xhgui-net
