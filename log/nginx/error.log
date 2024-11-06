@@ -11,3 +11,4 @@
 2024/08/09 08:56:31 [emerg] 1#1: host not found in upstream "php56" in /etc/nginx/conf.d/xhgui.conf:34
 2024/08/09 08:57:31 [emerg] 1#1: host not found in upstream "php56" in /etc/nginx/conf.d/xhgui.conf:34
 2024/08/09 09:03:10 [notice] 19#19: signal process started
+2024/11/06 03:31:28 [emerg] 1#1: host not found in upstream "php56" in /etc/nginx/conf.d/xhgui.conf:33
