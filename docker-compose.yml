@@ -57,5 +57,4 @@ services:
       - xhgui-net
 
 networks:
-  xhgui-net:
-     external: true
+  xhgui-net
