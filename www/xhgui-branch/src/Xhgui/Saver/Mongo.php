@@ -11,6 +11,18 @@ class Xhgui_Saver_Mongo implements Xhgui_Saver_Interface
     
     public function save($data)
     {
+        $dataP = [];
+        foreach($data['profile'] as $k => $v){  
+               $k = str_replace(".",":",$k);
+               $dataP[$k] = $v;
+        }
+        $dataM = [];
+        foreach($data['meta'] as $k => $v){  
+            $k = str_replace(".",":",$k);
+            $dataM[$k] = $v;
+        }
+        $data['profile'] = $dataP;
+        $data['meta'] = $dataM;
         return $this->_profiles->insert($data);
     }
 }

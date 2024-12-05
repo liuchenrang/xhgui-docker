@@ -20,8 +20,9 @@ try {
 
             $config += array('db.options' => array());
             $saver = Xhgui_Saver::factory($config);
+         
+            $result = $saver->save($data);
 
-            $saver->save($data);
             echo json_encode( $data);
 } catch (Exception $e) {
     error_log('xhgui - ' . $e->getMessage());
