@@ -16,6 +16,7 @@ services:
       - xhgui-net
   php72:
     image:  xinghuo/xhgui-docker-php72:20240809
+    entrypoint: ["/bin/sh", "-c", "chown -R www-data:www-data /var/www/html && php-fpm"]
     # build:
     #   context: .
     #   args:
