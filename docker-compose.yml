@@ -57,4 +57,4 @@ services:
       - xhgui-net
 
 networks:
-  xhgui-net
+  xhgui-net:
