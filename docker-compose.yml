@@ -15,7 +15,7 @@ services:
     networks:
       - xhgui-net
   php72:
-    image:  registry.cn-hangzhou.aliyuncs.com/ywimg/xhgui-docker-php72:20240809
+    image:  xinghuo/xhgui-docker-php72:20240809
     # build:
     #   context: .
     #   args:
